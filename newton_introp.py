@@ -38,7 +38,6 @@ def eval_newton(xs, cs, num, z, ex):
     print(result)
 
 
-
 def clean_file_data(num_of_variables, file_list):
     ex = 0
     # initialize new array to store the solved coefficients
@@ -76,9 +75,17 @@ def create_data_points(n):
     coeff(x, y, n, z, ex)
 
 
+def print_to_file(solution):
+    input_filename = args.filename
+    output_filename = os.path.splitext(input_filename)[0] + ".pnt"
+    with open(output_filename, "w") as external_file:
+        print(solution, file=external_file)
+        external_file.close()
+    print("\nThis solution has been placed in an output file named {}".format(output_filename))
+
 def main():
-    filename = "testCase.txt"
-    with open(filename) as file:
+
+    with open(args.filename) as file:
         # declare array we're going to get from the file
         content = []
 
@@ -99,8 +106,17 @@ def main():
             num_list[0][i] = float(content[0][i])
             num_list[1][i] = float(content[1][i])
 
-        print(n)
         clean_file_data(n, num_list)
+
+if args.spp:
+        # separate file matrix into a coefficient matrix and a constants matrix for easy operations
+        coefficient_matrix = np.array(constants_in_row_matrix[:-1])
+        constants_matrix = np.array(constants_in_row_matrix[-1])
+
+        # call method to start scaled partial pivoting algorithm
+        spp_gaussian(coefficient_matrix, constants_matrix, n)
+
+    else:
 
 
 
@@ -113,4 +129,13 @@ if __name__ == '__main__':
 
 
 
+  # start of getting arguments from command line
+    parser = argparse.ArgumentParser(
+        description='gaussian algorithms with naive as default and scaled partial pivoting '
+                    'as an optional flag written as: python3 gaussian <optional-flag> '
+                    '<filename>')
+    parser.add_argument('-spp', '--spp', action="store_true", help="calls spp algorithm")
+    parser.add_argument("filename", help="stores filename")
+    args = parser.parse_args()  # stores all the arguments int the commandline
 
+    main(args)
